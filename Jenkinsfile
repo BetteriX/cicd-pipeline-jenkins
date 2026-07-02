@@ -39,10 +39,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
+                    def container = "${CONTAINER_NAME}"
 
                     sh """
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
+                    if docker ps -a --format '{{.Names}}' | grep -Eq '^${container}\$'; then
+                        docker stop ${container} || true
+                        docker rm ${container} || true
+                    fi
                     """
 
                     sh """
