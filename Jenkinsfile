@@ -6,7 +6,9 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "${env.BRANCH_NAME == 'main' ? 'nodemain:v1.0' : 'nodedev:v1.0'}"
+        DOCKER_REPO = "betterix1"
+
+        IMAGE_NAME = "${DOCKER_REPO}/${env.BRANCH_NAME == 'main' ? 'nodemain' : 'nodedev'}:v1.0"
         CONTAINER_NAME = "${env.BRANCH_NAME == 'main' ? 'nodemain' : 'nodedev'}"
         PORT = "${env.BRANCH_NAME == 'main' ? '3000' : '3001'}"
     }
@@ -36,6 +38,24 @@ pipeline {
             }
         }
 
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+
+                        sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${IMAGE_NAME}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
@@ -49,15 +69,16 @@ pipeline {
                     """
 
                     sh """
+                    docker pull ${IMAGE_NAME}
+
                     docker run -d \
                     --name ${CONTAINER_NAME} \
-                    --expose ${PORT} \
                     -p ${PORT}:3000 \
                     ${IMAGE_NAME}
                     """
                 }
             }
-        }    
+        }   
     }
 
     post {
