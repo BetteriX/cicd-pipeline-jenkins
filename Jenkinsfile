@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS 7.8.0'
+        nodejs 'node'
     }
 
     environment {
@@ -56,7 +56,7 @@ pipeline {
             }
         }    
     }
-    
+
     post {
         success {
             echo "Deployment successful"
