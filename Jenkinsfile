@@ -6,8 +6,6 @@ pipeline {
     }
 
     environment {
-        PATH = "/usr/local/bin:/usr/bin:/bin:${env.PATH}"
-
         DOCKER_REPO = "betterix1"
 
         IMAGE_NAME = "${DOCKER_REPO}/${env.BRANCH_NAME == 'main' ? 'nodemain' : 'nodedev'}:v1.0"
@@ -36,7 +34,7 @@ pipeline {
 
         stage('Lint Check') {
             steps {
-                sh "hadolint Dockerfile"
+                sh "/usr/local/bin/hadolint Dockerfile"
             }
         }
 
@@ -91,7 +89,7 @@ pipeline {
             steps {
                 script {
                     def vulnerabilities = sh(
-                        script: "trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}",
+                        script: "/usr/local/bin/trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}",
                         returnStdout: true
                     ).trim()
 
