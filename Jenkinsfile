@@ -32,6 +32,12 @@ pipeline {
             }
         }
 
+        stage('Lint Check') {
+            steps {
+                sh "hadolint Dockerfile"
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME} ."
@@ -78,7 +84,17 @@ pipeline {
                     """
                 }
             }
-        }   
+        }
+        stage ('Scan Docker Image for Vulnerabilities') {
+            steps {
+                script {
+                    def vulnerabilities = sh(script: "trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress
+                    ${registry}:${env.BUILD_ID}", returnStdout: true).trim()
+
+                    echo "Vulnerability Report:\n${vulnerabilities}"
+                }
+            }
+        }
     }
 
     post {
