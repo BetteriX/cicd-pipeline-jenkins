@@ -34,7 +34,7 @@ pipeline {
 
         stage('Lint Check') {
             steps {
-                sh "hadolint Dockerfile"
+                sh "docker run --rm -i hadolint/hadolint < Dockerfile"
             }
         }
 
