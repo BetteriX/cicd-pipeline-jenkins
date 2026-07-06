@@ -34,7 +34,7 @@ pipeline {
 
         stage('Lint Check') {
             steps {
-                sh "/usr/local/bin/hadolint Dockerfile"
+                sh "docker run --rm hadolint/hadolint < Dockerfile"
             }
         }
 
@@ -88,12 +88,10 @@ pipeline {
         stage ('Scan Docker Image for Vulnerabilities') {
             steps {
                 script {
-                    def vulnerabilities = sh(
-                        script: "/usr/local/bin/trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}",
-                        returnStdout: true
-                    ).trim()
-
-                    echo "Vulnerability Report:\n${vulnerabilities}"
+                    sh """
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}
+                    """
                 }
             }
         }
