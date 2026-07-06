@@ -32,6 +32,12 @@ pipeline {
             }
         }
 
+        stage('Lint Check') {
+            steps {
+                sh "docker run --rm hadolint/hadolint < Dockerfile"
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME} ."
@@ -78,7 +84,17 @@ pipeline {
                     """
                 }
             }
-        }   
+        }
+        stage ('Scan Docker Image for Vulnerabilities') {
+            steps {
+                script {
+                    sh """
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}
+                    """ 
+                }
+            }
+        }
     }
 
     post {

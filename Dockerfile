@@ -1,5 +1,8 @@
 FROM node:7.8.0
+
 WORKDIR /opt
-ADD . /opt
+
+COPY package.json /opt/package.json
 RUN npm install
-ENTRYPOINT npm run start
+
+CMD ["npm", "start"]
