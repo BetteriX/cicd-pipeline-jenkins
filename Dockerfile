@@ -1,14 +1,10 @@
-FROM node:22-alpine
+FROM node:7.8.0
 
-WORKDIR /app
+WORKDIR /opt
 
-RUN npm install -g npm@11.18.0
-
-COPY package*.json ./
-RUN npm ci
+COPY package.json /opt/package.json
+RUN npm install
 
 COPY . .
 
-USER node
-
-CMD [ "npm", "run", "start" ]
+CMD ["npm", "start"]
